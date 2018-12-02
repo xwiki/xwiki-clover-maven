@@ -1,0 +1,1 @@
+assert new File(basedir, "target/XWikiReport-20171222-1835-20181129-1122.html").exists()
