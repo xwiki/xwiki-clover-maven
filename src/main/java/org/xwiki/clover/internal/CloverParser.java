@@ -30,15 +30,32 @@ import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 
+/**
+ * Parses a {@code clover.xml} file produced by Clover and store some of its data in memory in a {@link XMLDataSet}
+ * object.
+ *
+ * @version $Id$
+ * @since 1.0
+ */
 public class CloverParser
 {
+    private static final String NAME = "name";
+
     private Log logger;
 
+    /**
+     * @param logger the Maven logger that we use to log
+     */
     public CloverParser(Log logger)
     {
         this.logger = logger;
     }
 
+    /**
+     * @param xmlReport the {@code clover.xml} source data to parse
+     * @return the parsed data
+     * @throws Exception if there's an error during the parsing
+     */
     public XMLDataSet parse(Reader xmlReport) throws Exception
     {
         XMLDataSet dataSet = new XMLDataSet();
@@ -70,7 +87,7 @@ public class CloverParser
 
     private void walkFileElements(Element packageElement, XMLDataSet dataSet)
     {
-        String packageName = packageElement.attributeValue("name");
+        String packageName = packageElement.attributeValue(NAME);
 
         // First element is package <metrics>, ignore.
         Iterator<Element> iterator = packageElement.elementIterator();
@@ -93,7 +110,6 @@ public class CloverParser
                     this.logger.warn(String.format("Potentially missing test file: [%s]", filePath));
                 }
             } else {
-                this.logger.debug(String.format("Excluding test file [%s]", filePath));
                 // Find failing tests and record them.
                 walkTestElements(packageName, file, dataSet);
             }
@@ -116,7 +132,7 @@ public class CloverParser
             if (element.getName().equals("class")) {
                 // If we're already parsing a class ignore sub classes
                 if (testClassName == null) {
-                    testClassName = element.attributeValue("name");
+                    testClassName = element.attributeValue(NAME);
                     String failureAsString = element.elementIterator().next().attributeValue("testfailures");
                     if (failureAsString == null || Integer.parseInt(failureAsString) == 0) {
                         break;
@@ -158,9 +174,11 @@ public class CloverParser
         return metric;
     }
 
-    // Example input: "/home/hudsonagent/jenkins_root/workspace/Clover/xwiki-commons/xwiki-commons-core/
-    //   xwiki-commons-stability/src/main/java/org/xwiki/stability/Unstable.java"
-    // Returns "xwiki-commons-stability"
+    /**
+     * Example input: {@code /home/hudsonagent/jenkins_root/workspace/Clover/xwiki-commons/xwiki-commons-core/
+     * xwiki-commons-stability/src/main/java/org/xwiki/stability/Unstable.java}.
+     * Returns: {@code xwiki-commons-stability}
+     */
     private String extractModuleName(String path)
     {
         String before = StringUtils.substringBefore(path, "/src/");

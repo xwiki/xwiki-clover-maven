@@ -20,21 +20,20 @@
 package org.xwiki.clover.internal;
 
 /**
- * Converts a {@code DiffDataSet} into a serialized version (HTML, wiki markup, etc).
+ * Type of data processed.
  *
  * @version $Id$
  * @since 1.0
  */
-public interface DiffMetricsSerializer
+public enum DataType
 {
     /**
-     * @param diffDataSet the TPC differences
-     * @param oldDataSet the first report being compared
-     * @param newDataSet the second newer report being reported
-     * @param oldReportId the id to use for the first report in the serialization (used in titles, file names, etc)
-     * @param newReportId the id to use for the second report in the serialization (used in titles, file names, etc)
-     * @return the serialized data as a String
+     * Represents java packages.
      */
-    String serialize(DiffDataSet diffDataSet, XMLDataSet oldDataSet, XMLDataSet newDataSet, String oldReportId,
-        String newReportId);
+    PACKAGE,
+
+    /**
+     * Represents Maven modules.
+     */
+    MODULE
 }

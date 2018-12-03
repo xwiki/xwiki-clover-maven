@@ -19,6 +19,12 @@
  */
 package org.xwiki.clover.internal;
 
+/**
+ * Represents Clover data for a single package or module.
+ *
+ * @version $Id$
+ * @since 1.0
+ */
 public class CloverMetrics
 {
     private long conditionals;
@@ -32,66 +38,107 @@ public class CloverMetrics
 
     private double tpc;
 
+    /**
+     * @return the number of conditionals elements in the package or module
+     */
     public long getConditionals()
     {
         return this.conditionals;
     }
 
+    /**
+     * @param conditionals see {@link #getConditionals()}
+     */
     public void setConditionals(long conditionals)
     {
         this.conditionals = conditionals;
     }
 
+    /**
+     * @return the number of covered conditionals in the package or module
+     */
     public long getCoveredConditionals()
     {
         return this.coveredConditionals;
     }
 
+    /**
+     * @param coveredConditionals see {@link #getCoveredConditionals()}
+     */
     public void setCoveredConditionals(long coveredConditionals)
     {
         this.coveredConditionals = coveredConditionals;
     }
 
+    /**
+     * @return the number of covered methods in the package or module
+     */
     public long getCoveredMethods()
     {
         return this.coveredMethods;
     }
 
+    /**
+     * @param coveredMethods see {@link #getCoveredMethods()}
+     */
     public void setCoveredMethods(long coveredMethods)
     {
         this.coveredMethods = coveredMethods;
     }
 
+    /**
+     * @return the number of methods in the package or module
+     */
     public long getMethods()
     {
         return this.methods;
     }
 
+    /**
+     * @param methods see {@link #getMethods()}
+     */
     public void setMethods(long methods)
     {
         this.methods = methods;
     }
 
+    /**
+     * @return the number of covered statements in the package or module
+     */
     public long getCoveredStatements()
     {
         return this.coveredStatements;
     }
 
+    /**
+     * @param coveredStatements see {@link #getCoveredStatements()}
+     */
     public void setCoveredStatements(long coveredStatements)
     {
         this.coveredStatements = coveredStatements;
     }
 
+    /**
+     * @return the number of statements in the package or module
+     */
     public long getStatements()
     {
         return this.statements;
     }
 
+    /**
+     * @param statements see {@link #getStatements()}
+     */
     public void setStatements(long statements)
     {
         this.statements = statements;
     }
 
+    /**
+     * Add a new set of metrics to the current metric.
+     *
+     * @param metrics the metrics to add
+     */
     public void addMetrics(CloverMetrics metrics)
     {
         setStatements(getStatements() + metrics.getStatements());
@@ -102,24 +149,37 @@ public class CloverMetrics
         setCoveredMethods(getCoveredMethods() + metrics.getCoveredMethods());
     }
 
+    /**
+     * @return the TPC for the current metrics
+     */
     public double getTPC()
     {
         return this.tpc;
     }
 
+    /**
+     * Computes the TPC using the formula
+     * {@code (coveredConditionals + coveredStatements + coveredMethods)/(conditionals + statements + methods) * 100}.
+     */
     public void computeTPC()
     {
-        double tpc;
+        double newTPC;
         long elements = getConditionals() + getStatements() + getMethods();
         if (elements == 0) {
-            tpc = 0;
+            newTPC = 0;
         } else {
             long coveredElements = getCoveredConditionals() + getCoveredStatements() + getCoveredMethods();
-            tpc = ((double)coveredElements/(double)elements) * 100;
+            newTPC = ((double) coveredElements / (double) elements) * 100;
         }
-        this.tpc = tpc;
+        this.tpc = newTPC;
     }
 
+    /**
+     * Substracts metrics to the current metrics.
+     *
+     * @param metrics the metrics to substract
+     * @return the new metrics (current metric - passed metrics)
+     */
     public CloverMetrics substract(CloverMetrics metrics)
     {
         CloverMetrics newMetrics = new CloverMetrics();

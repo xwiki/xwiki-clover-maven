@@ -26,12 +26,21 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Compares two {@code XMLDataSet}s and computes TPC differences for each module/package.
+ *
+ * @version $Id$
+ * @since 1.0
+ */
 public class DiffMetricsGenerator
 {
     /**
+     * @param type the type of data to compare (package or module)
+     * @param oldDataSet the Clover metrics for the old report
+     * @param newDataSet the Clover metrics for the new report
      * @return the diff metrics by package or module, sorted by contributions (lowest to highest)
      */
-    public DiffDataSet generate(String type, XMLDataSet oldDataSet, XMLDataSet newDataSet)
+    public DiffDataSet generate(DataType type, XMLDataSet oldDataSet, XMLDataSet newDataSet)
     {
         DiffDataSet diffDataSet = new DiffDataSet();
 
@@ -88,9 +97,14 @@ public class DiffMetricsGenerator
         return diffDataSet;
     }
 
+    /**
+     * @param oldDataSet the Clover metrics for the old report
+     * @param newDataSet the Clover metrics for the new report
+     * @return the diff metrics by module, sorted by contributions (lowest to highest)
+     */
     public DiffDataSet generateForModules(XMLDataSet oldDataSet, XMLDataSet newDataSet)
     {
-        return generate(XMLDataSet.MODULE, oldDataSet, newDataSet);
+        return generate(DataType.MODULE, oldDataSet, newDataSet);
     }
 
     private double computeGlobalTPCWithoutModule(CloverMetrics newGlobalCloverMetrics, CloverMetrics metrics1,

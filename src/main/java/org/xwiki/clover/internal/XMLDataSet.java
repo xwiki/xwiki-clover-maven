@@ -33,27 +33,119 @@ import java.util.Map;
  */
 public class XMLDataSet
 {
-    public static final String PACKAGE = "package";
+    private Map<DataType, Map<String, CloverMetrics>> data = new HashMap<>();
 
-    public static final String MODULE = "module";
-
-    private Map<String, Map<String, CloverMetrics>> data = new HashMap<>();
-
-    private Map<String, CloverMetrics> globalData = new HashMap<>();
+    private Map<DataType, CloverMetrics> globalData = new HashMap<>();
 
     private List<String> testFailures = new ArrayList<>();
 
+    /**
+     * Record a new set of metrics for a package.
+     *
+     * @param metricKey the name of the package
+     * @param metrics the metrics to record
+     */
     public void addPackageMetrics(String metricKey, CloverMetrics metrics)
     {
-        addMetrics(PACKAGE, metricKey, metrics);
+        addMetrics(DataType.PACKAGE, metricKey, metrics);
     }
 
+    /**
+     * Record a new set of metrics for a module.
+     *
+     * @param metricKey the name of the module
+     * @param metrics the metrics to record
+     */
     public void addModuleMetrics(String metricKey, CloverMetrics metrics)
     {
-        addMetrics(MODULE, metricKey, metrics);
+        addMetrics(DataType.MODULE, metricKey, metrics);
     }
 
-    public void addMetrics(String type, String metricKey, CloverMetrics metrics)
+    /**
+     * @return the recorded metrics for all packages
+     */
+    public Map<String, CloverMetrics> getPackageData()
+    {
+        return getData(DataType.PACKAGE);
+    }
+
+    /**
+     * @return the recorded metrics for all modules
+     */
+    public Map<String, CloverMetrics> getModuleData()
+    {
+        return getData(DataType.MODULE);
+    }
+
+    /**
+     * @param type the type of data to return (package or modules)
+     * @return the metrics for the passed type
+     */
+    public Map<String, CloverMetrics> getData(DataType type)
+    {
+        return this.data.get(type);
+    }
+
+    /**
+     * Computes the TPCs for all packages and all modules.
+     */
+    public void computeTPCs()
+    {
+        for (Map.Entry<DataType, Map<String, CloverMetrics>> typeEntry : this.data.entrySet()) {
+            CloverMetrics globalMetrics = new CloverMetrics();
+            for (CloverMetrics metrics : typeEntry.getValue().values()) {
+                metrics.computeTPC();
+                globalMetrics.addMetrics(metrics);
+            }
+            globalMetrics.computeTPC();
+            this.globalData.put(typeEntry.getKey(), globalMetrics);
+        }
+    }
+
+    /**
+     * @return the global TPC for all modules
+     */
+    public CloverMetrics getModuleGlobalMetrics()
+    {
+        return getGlobalMetrics(DataType.MODULE);
+    }
+
+    /**
+     * @return the global TPC for all packages
+     */
+    public CloverMetrics getPackageGlobalMetrics()
+    {
+        return getGlobalMetrics(DataType.PACKAGE);
+    }
+
+    /**
+     * @param type the type of data to return (package or modules)
+     * @return the global TPC for the passed type
+     */
+    public CloverMetrics getGlobalMetrics(DataType type)
+    {
+        return this.globalData.get(type);
+    }
+
+    /**
+     * Record some failing tests.
+     *
+     * @param testSignatures the String signatures of the failing tests
+     */
+    public void addTestFailures(Collection<String> testSignatures)
+    {
+        this.testFailures.addAll(testSignatures);
+    }
+
+    /**
+     * @return the failing test signatures
+     */
+    public List<String> getTestFailures()
+    {
+        return this.testFailures;
+    }
+
+    private void addMetrics(DataType type, String metricKey, CloverMetrics metrics)
     {
         Map<String, CloverMetrics> dataPerType = this.data.get(type);
         if (dataPerType == null) {
@@ -73,59 +165,5 @@ public class XMLDataSet
         } else {
             currentMetrics.addMetrics(metrics);
         }
-    }
-
-    public Map<String, CloverMetrics> getData(String type)
-    {
-        return this.data.get(type);
-    }
-
-    public Map<String, CloverMetrics> getPackageData()
-    {
-        return getData(PACKAGE);
-    }
-
-    public Map<String, CloverMetrics> getModuleData()
-    {
-        return getData(MODULE);
-    }
-
-    public XMLDataSet computeTPCs()
-    {
-        for (Map.Entry<String, Map<String, CloverMetrics>> typeEntry : this.data.entrySet()) {
-            CloverMetrics globalMetrics = new CloverMetrics();
-            for (CloverMetrics metrics : typeEntry.getValue().values()) {
-                metrics.computeTPC();
-                globalMetrics.addMetrics(metrics);
-            }
-            globalMetrics.computeTPC();
-            this.globalData.put(typeEntry.getKey(), globalMetrics);
-        }
-        return this;
-    }
-
-    public CloverMetrics getGlobalMetrics(String type)
-    {
-        return this.globalData.get(type);
-    }
-
-    public CloverMetrics getModuleGlobalMetrics()
-    {
-        return this.globalData.get(MODULE);
-    }
-
-    public CloverMetrics getPackageGlobalMetrics()
-    {
-        return this.globalData.get(PACKAGE);
-    }
-
-    public void addTestFailures(Collection<String> testSignatures)
-    {
-        this.testFailures.addAll(testSignatures);
-    }
-
-    public List<String> getTestFailures()
-    {
-        return this.testFailures;
     }
 }

@@ -24,6 +24,12 @@ import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Serializes diff data into HTML.
+ *
+ * @version $Id$
+ * @since 1.0
+ */
 public class HTMLDiffMetricsSerializer implements DiffMetricsSerializer
 {
     private static final DecimalFormat FORMAT = new DecimalFormat("#.####");
@@ -34,6 +40,31 @@ public class HTMLDiffMetricsSerializer implements DiffMetricsSerializer
 
     private static final String NA = "N/A";
 
+    private static final String START_TABLE = "<table>";
+    private static final String START_TR = "<tr>";
+    private static final String START_TD = "<td>";
+    private static final String START_TH = "<th>";
+    private static final String START_THEAD = "<thead>";
+    private static final String START_TBODY = "<tbody>";
+    private static final String START_H2 = "<h2>";
+    private static final String START_P = "<p>";
+    private static final String START_H1 = "<h1>";
+
+    private static final String STOP_TABLE = "</table>";
+    private static final String STOP_TR = "</tr>";
+    private static final String STOP_TD = "</td>";
+    private static final String STOP_TH = "</th>";
+    private static final String STOP_THEAD = "</thead>";
+    private static final String STOP_TBODY = "</tbody>";
+    private static final String STOP_H2 = "</h2>";
+    private static final String STOP_P = "</p>";
+    private static final String STOP_H1 = "</h1>";
+
+    private static final String BR = "<br/>";
+
+    /**
+     * Sets the rounding strategy (we truncate numbers).
+     */
     public HTMLDiffMetricsSerializer()
     {
         // Truncate
@@ -45,21 +76,34 @@ public class HTMLDiffMetricsSerializer implements DiffMetricsSerializer
         String oldReportId, String newReportId)
     {
         StringBuilder content = new StringBuilder();
-        content.append("<h1>Report - " + oldReportId + " -> " + newReportId + "</h1>");
+        content.append(START_H1).append(String.format("Report - %s -> %s", oldReportId, newReportId)).append(STOP_H1);
 
         if (diffDataSet.hasFailures()) {
-            content.append("<p>FAILURE: There are modules having lowered the global TPC.</p>");
+            content.append(START_P).append("FAILURE: There are modules having lowered the global TPC").append(STOP_P);
         }
 
-        content.append("<h2>Modules affecting TPC</h2>");
-        content.append("<table><thead><tr>");
-        content.append("<th>Module</th><th>TPC Old</th><th>TPC New</th><th>TPC Diff</th>"
-            + "<th>Global TPC Contribution</th>");
-        content.append("</tr></thead><tbody>");
+        generateTPCHTML(content, diffDataSet, oldDataSet, newDataSet);
+        generateFailingTestHTML(content, oldDataSet, newDataSet);
+
+        return content.toString();
+    }
+
+    private void generateTPCHTML(StringBuilder content, DiffDataSet diffDataSet, XMLDataSet oldDataSet,
+        XMLDataSet newDataSet)
+    {
+        content.append(START_H2).append("Modules affecting TPC").append(STOP_H2);
+        content.append(START_TABLE);
+        addTableHead(content, "Module", "TPC Old", "TPC New", "TPC Diff", "Global TPC Contribution");
+        content.append(START_TBODY);
         double oldGlobalTPC = oldDataSet.getModuleGlobalMetrics().getTPC();
         double newGlobalTPC = newDataSet.getModuleGlobalMetrics().getTPC();
-        content.append("<tr><td>ALL</td><td>" + round(oldGlobalTPC) + "</td><td>" + round(newGlobalTPC) + "</td>");
-        content.append("<td>" + round(newGlobalTPC - oldGlobalTPC) + "</td><td>N/A</td></tr>");
+        content.append(START_TR);
+        content.append(START_TD).append("ALL").append(STOP_TD);
+        content.append(START_TD).append(round(oldGlobalTPC)).append(STOP_TD);
+        content.append(START_TD).append(round(newGlobalTPC)).append(STOP_TD);
+        content.append(START_TD).append(round(newGlobalTPC - oldGlobalTPC)).append(STOP_TD);
+        content.append(START_TD).append(NA).append(STOP_TD);
+        content.append(STOP_TR);
 
         for (Map.Entry<String, DiffMetrics> entry : diffDataSet.getDiffData().entrySet()) {
             DiffMetrics metrics = entry.getValue();
@@ -69,37 +113,66 @@ public class HTMLDiffMetricsSerializer implements DiffMetricsSerializer
             String diffTPC = metrics.getOldTPC() != null && metrics.getNewTPC() != null
                 ? round(metrics.getNewTPC() - metrics.getOldTPC()) : NA;
             String cssDiff = metrics.getContribution() < 0 || (metrics.getOldTPC() != null
-                && metrics.getNewTPC() != null && metrics.getNewTPC() - metrics.getOldTPC() < 0) ? RED: GREEN;
-            content.append("<tr><td>" + entry.getKey() + "</td><td " + css + ">" + oldTPC + "</td><td " + css + ">"
-                + newTPC + "</td>");
-            content.append("<td " + cssDiff + ">" + diffTPC + "</td><td " + css + ">"
-                + round(metrics.getContribution()) + "</td></tr>");
+                && metrics.getNewTPC() != null && metrics.getNewTPC() - metrics.getOldTPC() < 0) ? RED : GREEN;
+            content.append(START_TR);
+            content.append(START_TD).append(entry.getKey()).append(STOP_TD);
+            content.append(startTD(css)).append(oldTPC).append(STOP_TD);
+            content.append(startTD(css)).append(newTPC).append(STOP_TD);
+            content.append(startTD(cssDiff)).append(diffTPC).append(STOP_TD);
+            content.append(startTD(css)).append(round(metrics.getContribution())).append(STOP_TD);
+            content.append(STOP_TR);
         }
-        content.append("</tbody></table>");
+        content.append(STOP_TBODY);
+        content.append(STOP_TABLE);
+    }
 
-        content.append("<h2>Failing Tests</h2>");
+    private void addTableHead(StringBuilder content, String... columnValues)
+    {
+        content.append(START_THEAD).append(START_TR);
+        for (String value : columnValues) {
+            content.append(START_TH).append(value).append(STOP_TH);
+        }
+        content.append(STOP_TR).append(STOP_THEAD);
+    }
+
+    private void generateFailingTestHTML(StringBuilder content, XMLDataSet oldDataSet, XMLDataSet newDataSet)
+    {
+        content.append(START_H2).append("Failing Tests").append(STOP_H2);
 
         // Tests failing in oldDataset and not in newDataSet
         List<String> oldFailing = oldDataSet.getTestFailures();
         List<String> newFailing = newDataSet.getTestFailures();
-        content.append("<p>Differences of failing tests between old (" + oldFailing.size() + ") and new ("
-            + newFailing.size() + ") reports.<br/><br/>");
-        content.append("<table><thead><tr>");
-        content.append("<th>Old Failing</th><th>New Failing</th>");
-        content.append("</tr></thead><tbody>");
+        content.append(START_P);
+        content.append(String.format("Differences of failing tests between old (%s) and new (%s) reports.",
+            oldFailing.size(), newFailing.size()));
+        content.append(STOP_P);
+        content.append(BR).append(BR);
+        content.append(START_TABLE);
+        addTableHead(content, "Old Failing", "New Failing");
+        content.append(START_TBODY);
         for (String failing : oldFailing) {
             if (!newFailing.contains(failing)) {
-                content.append("<tr><td>" + failing + "</td><td>N/A</td></tr>");
+                content.append(START_TR);
+                content.append(START_TD).append(failing).append(STOP_TD);
+                content.append(START_TD).append(NA).append(STOP_TD);
+                content.append(STOP_TR);
             }
         }
         for (String failing : newFailing) {
             if (!oldFailing.contains(failing)) {
-                content.append("<tr><td>N/A</td><td>" + failing + "</td></tr>");
+                content.append(START_TR);
+                content.append(START_TD).append(NA).append(STOP_TD);
+                content.append(START_TD).append(failing).append(STOP_TD);
+                content.append(STOP_TR);
             }
         }
-        content.append("</tbody></table>");
+        content.append(STOP_TBODY);
+        content.append(STOP_TABLE);
+    }
 
-        return content.toString();
+    private String startTD(String css)
+    {
+        return String.format("<td %s>", css);
     }
 
     private String displayDouble(Double number)

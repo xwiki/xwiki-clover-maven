@@ -19,6 +19,12 @@
  */
 package org.xwiki.clover.internal;
 
+/**
+ * Represents TPC differences and contribution to the global TPC for a single module or a package.
+ *
+ * @version $Id$
+ * @since 1.0
+ */
 public class DiffMetrics
 {
     private Double oldTPC;
@@ -27,31 +33,49 @@ public class DiffMetrics
 
     private Double contribution;
 
+    /**
+     * @return the old TPC
+     */
     public Double getOldTPC()
     {
         return this.oldTPC;
     }
 
+    /**
+     * @param oldTPC see {@link #getOldTPC()}
+     */
     public void setOldTPC(Double oldTPC)
     {
         this.oldTPC = oldTPC;
     }
 
+    /**
+     * @return the new TPC
+     */
     public Double getNewTPC()
     {
         return this.newTPC;
     }
 
+    /**
+     * @param newTPC see {@link #getNewTPC()}
+     */
     public void setNewTPC(Double newTPC)
     {
         this.newTPC = newTPC;
     }
 
+    /**
+     * @return the contribution to the global TPC
+     */
     public Double getContribution()
     {
         return contribution;
     }
 
+    /**
+     * @param contribution see {@link #getContribution()}
+     */
     public void setContribution(Double contribution)
     {
         this.contribution = contribution;

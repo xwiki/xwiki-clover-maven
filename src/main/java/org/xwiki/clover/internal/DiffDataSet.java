@@ -22,25 +22,46 @@ package org.xwiki.clover.internal;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Represents a set of {@code DiffMetrics}.
+ *
+ * @version $Id$
+ * @since 1.0
+ */
 public class DiffDataSet
 {
     private Map<String, DiffMetrics> diffData = new HashMap<>();
 
+    /**
+     * @return the TPC and contribution differences for all packages or modules
+     */
     public Map<String, DiffMetrics> getDiffData()
     {
         return this.diffData;
     }
 
+    /**
+     * @param diffData see {@link #getDiffData()}
+     */
     public void setDiffData(Map<String, DiffMetrics> diffData)
     {
         this.diffData = diffData;
     }
 
+    /**
+     * Record some new diff data.
+     *
+     * @param key the package name or module name for which to add diff metrics
+     * @param metrics the diff metrics to add
+     */
     public void addDiffMetrics(String key, DiffMetrics metrics)
     {
         getDiffData().put(key, metrics);
     }
 
+    /**
+     * @return true if there are some packages or modules that contribute negatively to the global TPC
+     */
     public boolean hasFailures()
     {
         boolean failures = false;

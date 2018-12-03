@@ -21,7 +21,6 @@ package org.xwiki.clover.internal;
 
 import java.io.File;
 import java.io.FileReader;
-import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.maven.plugin.AbstractMojo;
@@ -32,6 +31,14 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 
+/**
+ * Generates a Clover diff report between two Clover XML reports, excluding test classes and showing global TPC
+ * contribution diffs for each Maven module with the goal of finding out which modules are negatively contributing
+ * to the global TPC.
+ *
+ * @version $Id$
+ * @since 1.0
+ */
 @Mojo(
     name = "report",
     defaultPhase = LifecyclePhase.VERIFY,
@@ -61,8 +68,10 @@ public class CloverReportMojo extends AbstractMojo
         try {
             // Parse clover.xml files
             CloverParser cloverParser = new CloverParser(getLog());
-            XMLDataSet dataSet1 = cloverParser.parse(new FileReader(this.oldCloverXMLReport)).computeTPCs();
-            XMLDataSet dataSet2 = cloverParser.parse(new FileReader(this.newCloverXMLReport)).computeTPCs();
+            XMLDataSet dataSet1 = cloverParser.parse(new FileReader(this.oldCloverXMLReport));
+            dataSet1.computeTPCs();
+            XMLDataSet dataSet2 = cloverParser.parse(new FileReader(this.newCloverXMLReport));
+            dataSet2.computeTPCs();
 
             // Generate diff data
             DiffMetricsGenerator diffMetricsGenerator = new DiffMetricsGenerator();
