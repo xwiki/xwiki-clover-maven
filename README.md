@@ -11,11 +11,14 @@ flat or increases (as measure by Jacoco), while we reduce the global coverage:
   causes different code to be exercised, then the global coverage can be reduced.   
 
 Links:
-* Original trigger: http://massol.myxwiki.org/xwiki/bin/view/Blog/ComparingCloverReports
+* Original trigger idea: http://massol.myxwiki.org/xwiki/bin/view/Blog/ComparingCloverReports
 * Discussed strategy: http://markmail.org/message/owtyhkmrz4tcbymn
 
 Usage
 =====
+
+Make sure the [XWiki Maven Repository](https://dev.xwiki.org/xwiki/bin/view/Community/Building/#HInstallingMaven) is 
+added to your Maven `settings.xml` file so that this plugin can be found.
 
 Configuration inside a `pom.xml`:
 
