@@ -21,6 +21,10 @@ package org.xwiki.clover.internal;
 
 import java.io.File;
 import java.io.FileReader;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.maven.plugin.AbstractMojo;
@@ -47,16 +51,16 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
 )
 public class CloverReportMojo extends AbstractMojo
 {
-    @Parameter(required = true)
-    private File oldCloverXMLReport;
+    @Parameter(required = true, property = "oldCloverXMLReport")
+    private String oldCloverXMLReport;
 
-    @Parameter(required = true)
+    @Parameter(required = true, property = "oldReportId")
     private String oldReportId;
 
-    @Parameter(required = true)
-    private File newCloverXMLReport;
+    @Parameter(required = true, property = "newCloverXMLReport")
+    private String newCloverXMLReport;
 
-    @Parameter(required = true)
+    @Parameter(required = true, property = "newReportId")
     private String newReportId;
 
     @Parameter(defaultValue = "${project.build.directory}")
@@ -68,9 +72,9 @@ public class CloverReportMojo extends AbstractMojo
         try {
             // Parse clover.xml files
             CloverParser cloverParser = new CloverParser(getLog());
-            XMLDataSet dataSet1 = cloverParser.parse(new FileReader(this.oldCloverXMLReport));
+            XMLDataSet dataSet1 = parseCloverXMLReport(cloverParser, this.oldCloverXMLReport);
             dataSet1.computeTPCs();
-            XMLDataSet dataSet2 = cloverParser.parse(new FileReader(this.newCloverXMLReport));
+            XMLDataSet dataSet2 = parseCloverXMLReport(cloverParser, this.newCloverXMLReport);
             dataSet2.computeTPCs();
 
             // Generate diff data
@@ -90,5 +94,24 @@ public class CloverReportMojo extends AbstractMojo
             throw new MojoExecutionException(String.format("Failed to generate the Clover diff report for old report "
                 + "[%s] and new report [%s]", this.oldCloverXMLReport, this.newCloverXMLReport), e);
         }
+    }
+
+    private XMLDataSet parseCloverXMLReport(CloverParser cloverParser, String report) throws Exception
+    {
+        try (Reader reader = isURL(report)
+            ? new InputStreamReader(new URL(report).openStream()) : new FileReader(new File(report)))
+        {
+            return cloverParser.parse(reader);
+        }
+    }
+
+    private boolean isURL(String report)
+    {
+        try {
+            new URL(report);
+        } catch (MalformedURLException e) {
+            return false;
+        }
+        return true;
     }
 }
