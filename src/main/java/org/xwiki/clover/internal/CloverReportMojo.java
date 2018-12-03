@@ -63,7 +63,7 @@ public class CloverReportMojo extends AbstractMojo
     @Parameter(required = true, property = "newReportId")
     private String newReportId;
 
-    @Parameter(defaultValue = "${project.build.directory}")
+    @Parameter(defaultValue = "${project.build.directory}", property = "diffReportOutputDirectory")
     private File outputDirectory;
 
     @Override
