@@ -35,9 +35,30 @@
   <description>
     Provide a Clover diff between two reports, excluding test classes and showing global TPC contribution diffs for
     each Maven module with the goal of finding out which modules are negatively contributing to the global TPC.
-   </description>
+  </description>
+  <url>https://github.com/xwiki/xwiki-clover-maven</url>
+  <scm>
+    <connection>scm:git:git://github.com/xwiki/xwiki-clover-maven.git</connection>
+    <developerConnection>scm:git:git@github.com:xwiki/xwiki-clover-maven.git</developerConnection>
+    <url>https://github.com/xwiki/xwiki-clover-maven/tree/master/</url>
+  </scm>
+  <issueManagement>
+    <system>jira</system>
+    <url>https://jira.xwiki.org/browse/XCLOVER</url>
+  </issueManagement>
+  <distributionManagement>
+    <snapshotRepository>
+      <id>nexus.xwiki.org</id>
+      <name>XWiki Maven Development Repository for Snapshots</name>
+      <url>http://nexus.xwiki.org/nexus/content/repositories/snapshots/</url>
+    </snapshotRepository>
+    <site>
+      <id>nexus.xwiki.org</id>
+      <url>dav:http://nexus.xwiki.org/nexus/content/sites/site/xwiki-clover-maven/</url>
+    </site>
+  </distributionManagement>
   <properties>
-    <xwiki.jacoco.instructionRatio>0.73</xwiki.jacoco.instructionRatio>
+    <!--xwiki.jacoco.instructionRatio>0.73</xwiki.jacoco.instructionRatio-->
   </properties>
   <dependencies>
     <dependency>
