@@ -41,12 +41,18 @@
     <connection>scm:git:git://github.com/xwiki/xwiki-clover-maven.git</connection>
     <developerConnection>scm:git:git@github.com:xwiki/xwiki-clover-maven.git</developerConnection>
     <url>https://github.com/xwiki/xwiki-clover-maven/tree/master/</url>
+    <tag>HEAD</tag>
   </scm>
   <issueManagement>
     <system>jira</system>
     <url>https://jira.xwiki.org/browse/XCLOVER</url>
   </issueManagement>
   <distributionManagement>
+    <repository>
+      <id>nexus.xwiki.org</id>
+      <name>XWiki Maven Remote Repository for Releases</name>
+      <url>http://nexus.xwiki.org/nexus/content/repositories/releases/</url>
+    </repository>
     <snapshotRepository>
       <id>nexus.xwiki.org</id>
       <name>XWiki Maven Development Repository for Snapshots</name>
@@ -58,7 +64,8 @@
     </site>
   </distributionManagement>
   <properties>
-    <!--xwiki.jacoco.instructionRatio>0.73</xwiki.jacoco.instructionRatio-->
+    <!-- Disable release staging and directly deploy on the configured distributionManagement -->
+    <xwiki.nexus.skipLocalStaging>true</xwiki.nexus.skipLocalStaging>
   </properties>
   <dependencies>
     <dependency>
