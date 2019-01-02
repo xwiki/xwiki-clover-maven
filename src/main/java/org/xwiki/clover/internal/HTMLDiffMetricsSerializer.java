@@ -107,18 +107,16 @@ public class HTMLDiffMetricsSerializer implements DiffMetricsSerializer
 
         for (Map.Entry<String, DiffMetrics> entry : diffDataSet.getDiffData().entrySet()) {
             DiffMetrics metrics = entry.getValue();
-            String css = metrics.getContribution() < 0 ? RED : GREEN;
+            String css = getCSS(metrics);
             String oldTPC = displayDouble(metrics.getOldTPC());
             String newTPC = displayDouble(metrics.getNewTPC());
             String diffTPC = metrics.getOldTPC() != null && metrics.getNewTPC() != null
                 ? round(metrics.getNewTPC() - metrics.getOldTPC()) : NA;
-            String cssDiff = metrics.getContribution() < 0 || (metrics.getOldTPC() != null
-                && metrics.getNewTPC() != null && metrics.getNewTPC() - metrics.getOldTPC() < 0) ? RED : GREEN;
             content.append(START_TR);
             content.append(START_TD).append(entry.getKey()).append(STOP_TD);
             content.append(startTD(css)).append(oldTPC).append(STOP_TD);
             content.append(startTD(css)).append(newTPC).append(STOP_TD);
-            content.append(startTD(cssDiff)).append(diffTPC).append(STOP_TD);
+            content.append(startTD(css)).append(diffTPC).append(STOP_TD);
             content.append(startTD(css)).append(round(metrics.getContribution())).append(STOP_TD);
             content.append(STOP_TR);
         }
@@ -126,6 +124,27 @@ public class HTMLDiffMetricsSerializer implements DiffMetricsSerializer
         content.append(STOP_TABLE);
     }
 
+    private String getCSS(DiffMetrics metrics)
+    {
+        // We display in RED modules that need to be fixed, i.e. modules that have a TPC diff < 0
+        // Note that the global contribution could be < 0 and yet the TPC diff > 0 (in case some code was removed),
+        // which is why checking for contribution < 0 is not a good metric.
+        // For new modules, base it on the contribution though.
+        // For removed modules, always consider it green
+        boolean isNew = metrics.getOldTPC() == null && metrics.getNewTPC() != null;
+        boolean isRemoved = metrics.getOldTPC() != null && metrics.getNewTPC() == null;
+        String css;
+        if (isNew) {
+            css = metrics.getContribution() >= 0 ? GREEN : RED;
+        } else if (isRemoved) {
+            css = GREEN;
+        } else if (metrics.getNewTPC() - metrics.getOldTPC() >= 0) {
+            css = GREEN;
+        } else {
+            css = RED;
+        }
+        return css;
+    }
     private void addTableHead(StringBuilder content, String... columnValues)
     {
         content.append(START_THEAD).append(START_TR);
