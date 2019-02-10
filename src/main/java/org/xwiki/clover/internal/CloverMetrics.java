@@ -19,6 +19,8 @@
  */
 package org.xwiki.clover.internal;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 /**
  * Represents Clover data for a single package or module.
  *
@@ -190,5 +192,19 @@ public class CloverMetrics
         newMetrics.setCoveredStatements(getCoveredStatements() - metrics.getCoveredStatements());
         newMetrics.setStatements(getStatements() - metrics.getStatements());
         return newMetrics;
+    }
+
+    @Override
+    public String toString()
+    {
+        return new ToStringBuilder(this).
+            append("conditionals", getConditionals()).
+            append("coveredConditionals", getCoveredConditionals()).
+            append("methods", getMethods()).
+            append("coveredMethods", getCoveredMethods()).
+            append("statements", getStatements()).
+            append("coveredStatements", getCoveredStatements()).
+            append("tpc", getTPC()).
+            toString();
     }
 }
