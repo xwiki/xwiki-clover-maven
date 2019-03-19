@@ -29,7 +29,7 @@
   </parent>
   <groupId>org.xwiki.clover</groupId>
   <artifactId>xwiki-clover-maven</artifactId>
-  <version>1.1</version>
+  <version>1.2-SNAPSHOT</version>
   <name>XWiki Clover plugin for Maven</name>
   <packaging>maven-plugin</packaging>
   <description>
@@ -41,7 +41,7 @@
     <connection>scm:git:git://github.com/xwiki/xwiki-clover-maven.git</connection>
     <developerConnection>scm:git:git@github.com:xwiki/xwiki-clover-maven.git</developerConnection>
     <url>https://github.com/xwiki/xwiki-clover-maven/tree/master/</url>
-    <tag>xwiki-clover-maven-1.1</tag>
+    <tag>HEAD</tag>
   </scm>
   <issueManagement>
     <system>jira</system>
