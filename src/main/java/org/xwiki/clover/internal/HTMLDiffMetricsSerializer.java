@@ -78,8 +78,12 @@ public class HTMLDiffMetricsSerializer implements DiffMetricsSerializer
         StringBuilder content = new StringBuilder();
         content.append(START_H1).append(String.format("Report - %s -> %s", oldReportId, newReportId)).append(STOP_H1);
 
+        if (hasGlobalCoverageFailure(oldDataSet, newDataSet)) {
+            content.append(START_P).append("ERROR: Global TPC has been lowered").append(STOP_P);
+        }
+
         if (diffDataSet.hasFailures()) {
-            content.append(START_P).append("FAILURE: There are modules having lowered the global TPC").append(STOP_P);
+            content.append(START_P).append("FAILURE: There are modules lowering the global TPC").append(STOP_P);
         }
 
         generateTPCHTML(content, diffDataSet, oldDataSet, newDataSet);
@@ -202,5 +206,17 @@ public class HTMLDiffMetricsSerializer implements DiffMetricsSerializer
     private String round(double number)
     {
         return FORMAT.format(number);
+    }
+
+    /**
+     * @return true if the global TPC has been lowered
+     */
+    private boolean hasGlobalCoverageFailure(XMLDataSet oldDataSet, XMLDataSet newDataSet)
+    {
+        boolean failure = false;
+        if (newDataSet.getModuleGlobalMetrics().getTPC() - oldDataSet.getModuleGlobalMetrics().getTPC() < 0) {
+            failure = true;
+        }
+        return failure;
     }
 }
